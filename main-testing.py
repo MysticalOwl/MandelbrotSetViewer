@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
+import multiprocessing as mp
 
 # these are global variables
 busy = False
@@ -10,7 +11,8 @@ xmax = 0.5
 ymin = -1.2
 ymax = 1.2
 
-px = 200
+px = 800
+max_iters = 50
 
 fig, ax = plt.subplots()
 
@@ -35,10 +37,7 @@ def draw_mandy(xmin, xmax, ymin, ymax):
     rows, cols = c_values.shape
     color_values = build_iters_matrix(rows, cols)
     for row in range(rows):
-        for col in range(cols):
-            c = c_values[row][col]
-            count = mandel_iters(c)
-            color_values[row][col] = count
+        c_vals = c_values[row][:]
     ax.clear()
     print("clearing")
     ax.imshow(color_values, extent=[xmin, xmax, ymin, ymax], aspect="auto", cmap=mpl.colormaps[cmapy])
@@ -57,7 +56,7 @@ def mandel_iters(c):
     z = 0
     oldabsz = 0
     k10 = 0
-    for iters in range(100):
+    for iters in range(max_iters):
         z = z**2 + c
         newabsz = np.abs(z)
         if newabsz > 10:
@@ -65,10 +64,11 @@ def mandel_iters(c):
             b = oldabsz - m*(iters-1)
             k10 = (10-b) / m
             break
-    if iters == 100:
-        return 0
+    if iters >= (max_iters-1):
+        color = 0
     else:
-        return k10
+        color = k10
+    return color
 
 
 def change_xlims(event_ax):
